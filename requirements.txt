@@ -143,3 +143,6 @@ Werkzeug==3.0.4
 wrapt==1.16.0
 xxhash==3.5.0
 yarl==1.10.0
+Flask
+gunicorn
+
