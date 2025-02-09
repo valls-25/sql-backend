@@ -45,7 +45,11 @@ def delete_data(id):
     db.session.commit()
     return jsonify({'message': 'Data deleted'})
 
+import os
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # Create tables
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))  # Use Render's assigned port
+    app.run(host="0.0.0.0", port=port)
+
