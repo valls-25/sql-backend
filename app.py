@@ -1,30 +1,46 @@
+import pymysql
+pymysql.install_as_MySQLdb()
+
+
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-
 app = Flask(__name__)
-CORS(app)  # Allow frontend to connect
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'  # Change to MySQL if needed
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+CORS(app)  
 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:fleabag20055@localhost/my_database'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+from flask_migrate import Migrate
+migrate = Migrate(app, db)
+
 
 class Data(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     value = db.Column(db.String(100), nullable=False)
+    value2 = db.Column(db.String(100), nullable=True)  # New optional field
+    value3 = db.Column(db.String(100), nullable=True)  # New optional field
+
 
 @app.route('/data', methods=['GET'])
 def get_data():
     data = Data.query.all()
-    return jsonify([{ 'id': d.id, 'name': d.name, 'value': d.value } for d in data])
+    return jsonify([{ 'id': d.id, 'name': d.name, 'value': d.value ,  'value2': d.value2,
+        'value3': d.value3} for d in data])
 
 @app.route('/data', methods=['POST'])
 def add_data():
-    new_data = Data(name=request.json['name'], value=request.json['value'])
+    new_data = Data(
+        name=request.json['name'], 
+        value=request.json['value'],
+        value2=request.json.get('value2', ''),  # Default to empty if not provided
+        value3=request.json.get('value3', '')
+    )
     db.session.add(new_data)
     db.session.commit()
-    return jsonify({ 'message': 'Data added!' })
+    return jsonify({'message': 'Data added!'})
+
 
 @app.route('/data/<int:id>', methods=['PUT'])
 def update_data(id):
@@ -36,6 +52,7 @@ def update_data(id):
     db.session.commit()
     return jsonify({'message': 'Data updated'})
 
+
 @app.route('/data/<int:id>', methods=['DELETE'])
 def delete_data(id):
     data = Data.query.get(id)
@@ -45,11 +62,6 @@ def delete_data(id):
     db.session.commit()
     return jsonify({'message': 'Data deleted'})
 
-import os
-
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()  # Create tables
-    port = int(os.environ.get("PORT", 10000))  # Use Render's assigned port
-    app.run(host="0.0.0.0", port=port)
-
+    
+    app.run(debug=True)
