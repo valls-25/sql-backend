@@ -43,6 +43,9 @@ Flask-SQLAlchemy==3.1.1
 fqdn==1.5.1
 frozenlist==1.4.1
 fsspec==2024.6.1
+flask_sqlalchemy
+flask_cors
+flask-migrate
 greenlet==3.1.1
 gunicorn
 h11==0.14.0
